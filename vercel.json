@@ -6,16 +6,20 @@
       "destination": "/api/admin/login.js"
     },
     {
-      "source": "/api/admin/(.*)",
-      "destination": "/api/admin/index.js"
+      "source": "/api/admin/:path*",
+      "destination": "/api/admin/:path*.js"
     },
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
+      "source": "/api/:path*",
+      "destination": "/api/:path*.js"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "/public/admin/:path*"
     },
     {
       "source": "/(.*)",
-      "destination": "/public/admin/$1"
+      "destination": "/public/admin/index.html"
     }
   ]
 }

@@ -1,4 +1,4 @@
-const { initFirebase, setCORS, authenticateAdmin } = require('../../lib/firebase');
+const { initFirebase, setCORS } = require('../lib/firebase');
 
 module.exports = async (req, res) => {
     setCORS(res);
@@ -9,96 +9,73 @@ module.exports = async (req, res) => {
 
     const db = initFirebase();
 
-    // Authenticate (except for login endpoint)
-    const user = await authenticateAdmin(req);
-    if (!user) {
-        return res.status(401).json({ error: 'Unauthorized' });
-    }
-
     try {
-        // Parse path
-        const fullPath = req.url.split('?')[0];
-        const pathParts = fullPath.split('/').filter(Boolean);
-        
-        // pathParts akan jadi: ['api', 'admin', 'pesan'] atau ['api', 'admin', 'home']
-        const resource = pathParts[2]; // pesan, home, kegiatan, struktur, kontak
-        const id = pathParts[3]; // optional ID
-        const action = pathParts[4]; // optional action (e.g., 'read')
+        // Parse path: /api/home, /api/kegiatan, dll
+        const path = req.url.split('?')[0].replace('/api/', '');
 
-        // === PESAN ENDPOINTS ===
-        
-        // GET /api/admin/pesan - Get all messages
-        if (resource === 'pesan' && req.method === 'GET' && !id) {
-            const snapshot = await db.collection('pesan').orderBy('timestamp', 'desc').get();
-            const messages = [];
+        // GET /api/home
+        if (path === 'home' && req.method === 'GET') {
+            const doc = await db.collection('home').doc('data').get();
+            if (doc.exists) {
+                return res.json(doc.data());
+            }
+            return res.status(404).json({ error: 'Data not found' });
+        }
+
+        // GET /api/kegiatan
+        if (path === 'kegiatan' && req.method === 'GET') {
+            const snapshot = await db.collection('kegiatan').get();
+            const activities = [];
             snapshot.forEach(doc => {
-                messages.push({ id: doc.id, ...doc.data() });
+                activities.push({ id: doc.id, ...doc.data() });
             });
-            return res.json(messages);
+            return res.json(activities);
         }
 
-        // DELETE /api/admin/pesan/:id - Delete message
-        if (resource === 'pesan' && req.method === 'DELETE' && id) {
-            await db.collection('pesan').doc(id).delete();
-            return res.json({ status: 'success', message: 'Message deleted' });
+        // GET /api/struktur
+        if (path === 'struktur' && req.method === 'GET') {
+            const doc = await db.collection('struktur').doc('data').get();
+            if (doc.exists) {
+                return res.json(doc.data());
+            }
+            return res.status(404).json({ error: 'Data not found' });
         }
 
-        // PATCH /api/admin/pesan/:id/read - Mark as read
-        if (resource === 'pesan' && req.method === 'PATCH' && id && action === 'read') {
-            await db.collection('pesan').doc(id).update({ read: true });
-            return res.json({ status: 'success' });
+        // GET /api/kontak
+        if (path === 'kontak' && req.method === 'GET') {
+            const doc = await db.collection('kontak').doc('data').get();
+            if (doc.exists) {
+                return res.json(doc.data());
+            }
+            return res.status(404).json({ error: 'Data not found' });
         }
 
-        // === HOME ENDPOINTS ===
-        
-        // PUT /api/admin/home - Update home data
-        if (resource === 'home' && req.method === 'PUT') {
-            await db.collection('home').doc('data').set(req.body);
-            return res.json({ status: 'success', message: 'Home data updated' });
-        }
+        // POST /api/pesan
+        if (path === 'pesan' && req.method === 'POST') {
+            const { name, email, message, subject } = req.body;
 
-        // === KEGIATAN ENDPOINTS ===
-        
-        // POST /api/admin/kegiatan - Add activity
-        if (resource === 'kegiatan' && req.method === 'POST') {
-            const activityData = req.body;
-            const newDoc = await db.collection('kegiatan').add(activityData);
-            return res.json({ status: 'success', id: newDoc.id });
-        }
+            if (!name || !email || !message) {
+                return res.status(400).json({ error: 'All fields required' });
+            }
 
-        // PUT /api/admin/kegiatan/:id - Update activity
-        if (resource === 'kegiatan' && req.method === 'PUT' && id) {
-            await db.collection('kegiatan').doc(id).update(req.body);
-            return res.json({ status: 'success', message: 'Activity updated' });
-        }
+            const newMessage = {
+                name,
+                email,
+                message,
+                subject: subject || 'No Subject',
+                timestamp: new Date().toISOString(),
+                read: false
+            };
 
-        // DELETE /api/admin/kegiatan/:id - Delete activity
-        if (resource === 'kegiatan' && req.method === 'DELETE' && id) {
-            await db.collection('kegiatan').doc(id).delete();
-            return res.json({ status: 'success', message: 'Activity deleted' });
-        }
-
-        // === STRUKTUR ENDPOINTS ===
-        
-        // PUT /api/admin/struktur - Update struktur
-        if (resource === 'struktur' && req.method === 'PUT') {
-            await db.collection('struktur').doc('data').set(req.body);
-            return res.json({ status: 'success', message: 'Struktur data updated' });
-        }
-
-        // === KONTAK ENDPOINTS ===
-        
-        // PUT /api/admin/kontak - Update kontak
-        if (resource === 'kontak' && req.method === 'PUT') {
-            await db.collection('kontak').doc('data').set(req.body);
-            return res.json({ status: 'success', message: 'Kontak data updated' });
+            await db.collection('pesan').add(newMessage);
+            return res.json({ status: 'success', message: 'Message sent' });
         }
 
         // Route not found
-        return res.status(404).json({ error: 'Admin endpoint not found' });
+        return res.status(404).json({ error: 'Endpoint not found' });
 
     } catch (error) {
-        console.error('Admin API Error:', error);
-        return res.status(500).json({ error: 'Internal server error' });
+        console.error('API Error:', error);
+        return res.status(500).json({ error: 'Internal server error', details: error.message });
     }
 };

@@ -4,8 +4,8 @@
   "description": "Backend API for HIMA AKUNTANSI UT BANDUNG with Admin Panel",
   "main": "server.js",
   "scripts": {
-    "start": "node  backend/server.js",
-    "dev": "nodemon server.js"
+    "start": "node  server-express-backup.js",
+    "dev": "nodemon server-express-backup.js"
   },
   "engines": {
     "node": ">=18.0.0"

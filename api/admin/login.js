@@ -1,4 +1,4 @@
-const { initFirebase, setCORS } = require('../../lib/firebase');
+const { initFirebase, setCORS } = require('../lib/firebase');
 
 module.exports = async (req, res) => {
     // Set CORS headers

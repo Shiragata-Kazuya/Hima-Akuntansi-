@@ -2,7 +2,7 @@
   "name": "hima-akuntansi-backend",
   "version": "2.0.0",
   "description": "Backend API for HIMA AKUNTANSI UT BANDUNG with Admin Panel",
-  "main": "server.js",
+  "main": "server-express-backup.js",
   "scripts": {
   "start": "node api/index.js",
   "dev": "nodemon api/index.js"

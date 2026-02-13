@@ -23,7 +23,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/public/$1"
+      "destination": "/public/admin/index.html"
     }
   ]
 }

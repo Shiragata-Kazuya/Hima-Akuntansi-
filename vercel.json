@@ -15,15 +15,15 @@
     },
     {
       "source": "/admin",
-      "destination": "/public/admin/index.html"
+      "destination": "/admin/index.html"
     },
     {
       "source": "/admin/:path*",
-      "destination": "/public/admin/:path*"
+      "destination": "/admin/:path*"
     },
     {
       "source": "/(.*)",
-      "destination": "/public/admin/index.html"
+      "destination": "/admin/index.html"
     }
   ]
 }

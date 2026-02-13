@@ -1,43 +1,29 @@
 {
   "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
+      "source": "/api/admin/login",
+      "destination": "/api/admin/login.js"
     },
     {
-      "src": "public/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/admin/login",
-      "dest": "/api/admin/login.js"
+      "source": "/api/admin/:path*",
+      "destination": "/api/admin/index.js"
     },
     {
-      "src": "/api/admin/pesan/(.*)",
-      "dest": "/api/admin/index.js"
+      "source": "/api/:path*",
+      "destination": "/api/index.js"
     },
     {
-      "src": "/api/admin/(.*)",
-      "dest": "/api/admin/index.js"
+      "source": "/admin",
+      "destination": "/public/admin/index.html"
     },
     {
-      "src": "/api/(home|kegiatan|struktur|kontak|pesan)",
-      "dest": "/api/index.js"
+      "source": "/admin/:path*",
+      "destination": "/public/admin/:path*"
     },
     {
-      "src": "/admin/(.*)",
-      "dest": "/public/admin/$1"
-    },
-    {
-      "src": "/admin",
-      "dest": "/public/admin/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/public/$1"
+      "source": "/(.*)",
+      "destination": "/public/$1"
     }
   ]
 }
